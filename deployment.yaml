@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devsolutions-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devsolutions-frontend
+  template:
+    metadata:
+      labels:
+        app: devsolutions-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: devsolutions-frontend:v1
+        ports:
+        - containerPort: 80

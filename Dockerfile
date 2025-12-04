@@ -1,0 +1,2 @@
+FROM nginx:alpine
+COPY app/frontend/ /usr/share/nginx/html

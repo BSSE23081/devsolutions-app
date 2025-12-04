@@ -2,16 +2,18 @@ pipeline {
     agent any
 
     environment {
-        // Corrected path for the Kubernetes deployment manifest
+        // Correct path for the Kubernetes deployment manifest
         KUBE_DEPLOYMENT = "app/k8s/devsolutions-app.yaml"
 
         // Backend Image Variables
         BACKEND_DOCKER_IMAGE = "devsolutions-backend:latest"
-        BACKEND_DOCKERFILE_PATH = "./app/backend"
+        // 💡 SIMPLIFIED: Only need the path to the directory (build context)
+        BACKEND_BUILD_CONTEXT = "app/backend" 
 
         // Frontend Image Variables
         FRONTEND_DOCKER_IMAGE = "devsolutions-frontend:latest"
-        FRONTEND_DOCKERFILE_PATH = "./app/frontend" 
+        // 💡 SIMPLIFIED: Only need the path to the directory (build context)
+        FRONTEND_BUILD_CONTEXT = "app/frontend" 
     }
 
     stages {
@@ -26,8 +28,9 @@ pipeline {
         // --- Backend Stages ---
         stage('Build Backend Image') {
             steps {
-                // Using the corrected path: ./app/backend
-                sh "docker build -t $BACKEND_DOCKER_IMAGE -f $BACKEND_DOCKERFILE_PATH/Dockerfile $BACKEND_DOCKERFILE_PATH"
+                // ✅ CORRECTED: If the Dockerfile is named 'Dockerfile' and is in the build context,
+                // you only need to specify the build context path.
+                sh "docker build -t $BACKEND_DOCKER_IMAGE $BACKEND_BUILD_CONTEXT"
             }
         }
 
@@ -48,8 +51,8 @@ pipeline {
         // --- Frontend Stages ---
         stage('Build Frontend Image') {
             steps {
-                // Build Frontend image using the path: ./app/frontend
-                sh "docker build -t $FRONTEND_DOCKER_IMAGE -f $FRONTEND_DOCKERFILE_PATH/Dockerfile $FRONTEND_DOCKERFILE_PATH"
+                // ✅ CORRECTED: Using the simplified command for the Frontend as well.
+                sh "docker build -t $FRONTEND_DOCKER_IMAGE $FRONTEND_BUILD_CONTEXT"
             }
         }
 
@@ -68,7 +71,6 @@ pipeline {
         // --- Deployment Stage ---
         stage('Deploy to Kubernetes') {
             steps {
-                // Uses the corrected KUBE_DEPLOYMENT path: app/k8s/devsolutions-app.yaml
                 echo "Deploying application using $KUBE_DEPLOYMENT"
                 sh "kubectl apply -f $KUBE_DEPLOYMENT"
             }

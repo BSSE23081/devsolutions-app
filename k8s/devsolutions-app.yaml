@@ -1,0 +1,136 @@
+# k8s/devsolutions-app.yaml
+
+# --------------------
+# MySQL Deployment
+# --------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devsolutions-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devsolutions-db
+  template:
+    metadata:
+      labels:
+        app: devsolutions-db
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootpassword"
+        - name: MYSQL_DATABASE
+          value: "devdb"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: db-data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devsolutions-db-service
+spec:
+  selector:
+    app: devsolutions-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
+
+# --------------------
+# Backend Deployment
+# --------------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devsolutions-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devsolutions-backend
+  template:
+    metadata:
+      labels:
+        app: devsolutions-backend
+    spec:
+      containers:
+      - name: backend
+        image: devsolutions-backend:v1
+        env:
+        - name: DB_HOST
+          value: devsolutions-db-service
+        - name: DB_USER
+          value: root
+        - name: DB_PASSWORD
+          value: rootpassword
+        - name: DB_NAME
+          value: devdb
+        ports:
+        - containerPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devsolutions-backend-service
+spec:
+  selector:
+    app: devsolutions-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: NodePort
+  nodePort: 30002
+
+# --------------------
+# Frontend Deployment
+# --------------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devsolutions-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devsolutions-frontend
+  template:
+    metadata:
+      labels:
+        app: devsolutions-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: devsolutions-frontend:v1
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devsolutions-frontend-service
+spec:
+  selector:
+    app: devsolutions-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+  nodePort: 30001

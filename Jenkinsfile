@@ -2,19 +2,15 @@ pipeline {
     agent any
 
     environment {
-        // Correct path for the Kubernetes deployment manifest
-        KUBE_DEPLOYMENT = "app/k8s/devsolutions-app.yaml"
+        KUBE_DEPLOYMENT = "k8s/devsolutions-app.yaml"
 
-        // Backend Image Variables
         BACKEND_DOCKER_IMAGE = "devsolutions-backend:latest"
-        // 💡 SIMPLIFIED: Only need the path to the directory (build context)
-        BACKEND_BUILD_CONTEXT = "app/backend" 
+        BACKEND_BUILD_CONTEXT = "app/backend"
 
-        // Frontend Image Variables
         FRONTEND_DOCKER_IMAGE = "devsolutions-frontend:latest"
-        // 💡 SIMPLIFIED: Only need the path to the directory (build context)
-        FRONTEND_BUILD_CONTEXT = "app/frontend" 
+        FRONTEND_BUILD_CONTEXT = "app/frontend"
     }
+
 
     stages {
         stage('Pull Code') {
